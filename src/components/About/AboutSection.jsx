@@ -1,6 +1,9 @@
-import { motion } from 'framer-motion';
-import { useInView } from '../../hooks/usePortfolio';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { personalInfo } from '../../data/portfolioData';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const stats = [
   { value: '20+', label: 'Projects Completed' },
@@ -10,7 +13,72 @@ const stats = [
 ];
 
 const AboutSection = () => {
-  const [sectionRef, inView] = useInView({ threshold: 0.15 });
+  const sectionRef = useRef(null);
+  const textRef = useRef(null);
+  const cardRef = useRef(null);
+  const statsRef = useRef([]);
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      // Text reveal
+      if (textRef.current) {
+        gsap.from(textRef.current.children, {
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 75%',
+          }
+        });
+      }
+
+      // Card reveal
+      if (cardRef.current) {
+        gsap.from(cardRef.current, {
+          x: 50,
+          opacity: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 65%',
+          }
+        });
+      }
+
+      // Stats reveal
+      if (statsRef.current.length > 0) {
+        gsap.from(statsRef.current, {
+          y: 30,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'back.out(1.2)',
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: 'top 70%',
+          }
+        });
+      }
+      
+      // Background glow parallax
+      gsap.to('.about-bg-glow', {
+        y: 150,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        }
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section
@@ -19,7 +87,7 @@ const AboutSection = () => {
       style={{ padding: '120px 0', position: 'relative', overflow: 'hidden' }}
     >
       {/* BG decoration */}
-      <div aria-hidden style={{
+      <div className="about-bg-glow" aria-hidden style={{
         position: 'absolute',
         top: '10%',
         left: '-200px',
@@ -39,11 +107,7 @@ const AboutSection = () => {
         }}>
           {/* Left — Text Content */}
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6 }}
-            >
+            <div ref={textRef}>
               <span className="section-tag">Who I Am</span>
               <h2 className="section-title" style={{ marginBottom: '24px' }}>
                 Passionate About{' '}
@@ -85,16 +149,14 @@ const AboutSection = () => {
                   View GitHub
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right — Stats and Card */}
           <div>
             {/* Profile card */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
+            <div
+              ref={cardRef}
               className="glass-card"
               style={{ padding: '32px', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}
             >
@@ -124,7 +186,7 @@ const AboutSection = () => {
                   flexShrink: 0,
                   boxShadow: '0 0 30px rgba(108,99,255,0.4)',
                 }}>
-                  R
+                  {personalInfo.name.charAt(0)}
                 </div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: '18px', fontFamily: "'Outfit', sans-serif" }}>{personalInfo.name}</div>
@@ -144,16 +206,14 @@ const AboutSection = () => {
                   <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{item.label}</span>
                 </div>
               ))}
-            </motion.div>
+            </div>
 
             {/* Stats grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {stats.map((stat, i) => (
-                <motion.div
+                <div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                  ref={el => statsRef.current[i] = el}
                   className="glass-card"
                   style={{ padding: '20px', textAlign: 'center' }}
                 >
@@ -161,7 +221,7 @@ const AboutSection = () => {
                     {stat.value}
                   </div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px', lineHeight: 1.4 }}>{stat.label}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

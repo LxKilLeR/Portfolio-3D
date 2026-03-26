@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cursor, { ScrollProgress, MouseLight } from './components/UI/Cursor';
+import CursorGlow from './components/UI/CursorGlow';
 import LoadingScreen from './components/UI/LoadingScreen';
 import Navbar from './components/UI/Navbar';
 
@@ -54,7 +55,8 @@ function App() {
     <>
       {/* Custom Cursor */}
       <Cursor />
-      
+      <CursorGlow />
+
       {/* Mouse follow light */}
       <MouseLight />
 
@@ -82,23 +84,23 @@ function App() {
               <Suspense fallback={<SectionFallback />}>
                 <HeroSection />
               </Suspense>
-              
+
               <Suspense fallback={<SectionFallback />}>
                 <AboutSection />
               </Suspense>
-              
+
               <Suspense fallback={<SectionFallback />}>
                 <SkillsSection />
               </Suspense>
-              
+
               <Suspense fallback={<SectionFallback />}>
                 <ProjectsSection />
               </Suspense>
-              
+
               <Suspense fallback={<SectionFallback />}>
                 <ExperienceSection />
               </Suspense>
-              
+
               <Suspense fallback={<SectionFallback />}>
                 <ContactSection />
               </Suspense>

@@ -1,14 +1,17 @@
 import { useRef, Suspense, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Points, PointMaterial, OrbitControls, Sphere, MeshDistortMaterial } from '@react-three/drei';
+import { Points, PointMaterial, Sphere, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 
 /**
  * Animated particle stars background
  */
 function Stars({ count = 5000 }) {
   const ref = useRef();
-  
+
   // Generate random sphere points
   const sphere = useMemo(() => {
     const positions = new Float32Array(count * 3);
@@ -49,6 +52,7 @@ function Stars({ count = 5000 }) {
 function FloatingSphere({ mouseX, mouseY }) {
   const meshRef = useRef();
   const lightRef = useRef();
+  const outerOrbitRef = useRef();
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
@@ -59,14 +63,48 @@ function FloatingSphere({ mouseX, mouseY }) {
     meshRef.current.rotation.z = mouseX.current * 0.3;
   });
 
+  useGSAP(() => {
+    if (!outerOrbitRef.current) return;
+
+    // Expand the outer orbit as we scroll down to the bottom of the page
+    gsap.to(outerOrbitRef.current.scale, {
+      x: 1.5,
+      y: 1.5,
+      z: 1.5,
+      ease: "none",
+      scrollTrigger: {
+        trigger: document.documentElement, 
+        start: "top top",
+        end: "max",
+        scrub: 1,
+        invalidateOnRefresh: true,
+      }
+    });
+
+    // Make the outer orbit rotate based on document scroll 
+    gsap.to(outerOrbitRef.current.rotation, {
+      x: 0,
+      y: Math.PI * 4,
+      z: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: document.documentElement,
+        start: "top top", 
+        end: "max",
+        scrub: 1,
+        invalidateOnRefresh: true,
+      }
+    });
+  }, { scope: outerOrbitRef });
+
   return (
     <>
       {/* Ambient point light that follows sphere */}
       <pointLight ref={lightRef} color="#6c63ff" intensity={2} distance={4} />
       <pointLight position={[2, 2, 0]} color="#00d4ff" intensity={1} distance={5} />
-      
+
       {/* Main sphere */}
-      <Sphere ref={meshRef} args={[1, 64, 64]} position={[0, 0, 0]}>
+      <Sphere ref={meshRef} args={[0.8, 64, 64]} position={[0, 0, 0]}>
         <MeshDistortMaterial
           color="#6c63ff"
           attach="material"
@@ -79,12 +117,12 @@ function FloatingSphere({ mouseX, mouseY }) {
         />
       </Sphere>
 
-      {/* Outer glow ring */}
-      <Sphere args={[1.15, 32, 32]} position={[0, 0, 0]}>
+      {/* Outer glow ring / Wireframe orbit */}
+      <Sphere ref={outerOrbitRef} args={[1.15, 32, 32]} position={[0, 0, 0]}>
         <meshBasicMaterial
           color="#6c63ff"
           transparent
-          opacity={0.06}
+          opacity={0.15}
           wireframe
         />
       </Sphere>
@@ -104,7 +142,10 @@ function OrbitingParticles() {
       const angle = (i / count) * Math.PI * 2;
       const radius = 1.6 + Math.random() * 0.4;
       const yOffset = (Math.random() - 0.5) * 0.4;
-      return { angle, radius, yOffset, speed: 0.3 + Math.random() * 0.4 };
+      const speed = 0.3 + Math.random() * 0.4;
+      const size = 0.012 + Math.random() * 0.01;
+      const opacity = 0.7 + Math.random() * 0.3;
+      return { angle, radius, yOffset, speed, size, opacity };
     });
   }, []);
 
@@ -123,11 +164,11 @@ function OrbitingParticles() {
     <group ref={groupRef}>
       {particles.map((p, i) => (
         <mesh key={i}>
-          <sphereGeometry args={[0.012 + Math.random() * 0.01, 8, 8]} />
+          <sphereGeometry args={[p.size, 8, 8]} />
           <meshBasicMaterial
             color={i % 3 === 0 ? '#6c63ff' : i % 3 === 1 ? '#00d4ff' : '#ff6b6b'}
             transparent
-            opacity={0.7 + Math.random() * 0.3}
+            opacity={p.opacity}
           />
         </mesh>
       ))}

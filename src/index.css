@@ -15,12 +15,14 @@
   --text-secondary: #9090b0;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --cursor-size: 12px;
+  --cursor-size: 10px;
   --cursor-outline-size: 40px;
 }
 
 /* ===================== RESET & BASE ===================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -42,9 +44,11 @@ body {
 ::-webkit-scrollbar {
   width: 4px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--primary);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--accent);
   border-radius: 2px;
@@ -55,13 +59,13 @@ body {
   position: fixed;
   width: var(--cursor-size);
   height: var(--cursor-size);
-  background: var(--accent);
+  background: #ffffff;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
   transition: transform 0.1s ease, background 0.2s ease, width 0.2s ease, height 0.2s ease;
-  mix-blend-mode: screen;
+  mix-blend-mode: difference;
 }
 
 .cursor-outline {
@@ -148,8 +152,15 @@ body {
 }
 
 @keyframes gradientX {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* ===================== MAGNETIC BUTTON ===================== */
@@ -290,9 +301,10 @@ body {
 
 /* ===================== HERO ===================== */
 .hero-canvas {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -374,7 +386,7 @@ body::before {
 
 /* ===================== UTILITIES ===================== */
 .text-gradient {
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -394,14 +406,31 @@ body::before {
 
 /* Smooth fade in animation */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-.fade-up { animation: fadeUp 0.8s ease forwards; }
-.fade-in { animation: fadeIn 0.8s ease forwards; }
+.fade-up {
+  animation: fadeUp 0.8s ease forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}

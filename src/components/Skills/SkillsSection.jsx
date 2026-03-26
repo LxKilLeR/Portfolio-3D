@@ -7,7 +7,7 @@ import { useInView } from '../../hooks/usePortfolio';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const SkillsScene = lazy(() => import('./SkillsScene'));
+
 
 /**
  * Individual skill card with hover animation
@@ -133,28 +133,7 @@ const SkillsSection = () => {
           </p>
         </motion.div>
 
-        {/* 3D Scene */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: '24px',
-            overflow: 'hidden',
-            marginBottom: '48px',
-            minHeight: '450px',
-          }}
-        >
-          <Suspense fallback={
-            <div style={{ height: '450px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-              Loading 3D scene...
-            </div>
-          }>
-            <SkillsScene skills={skills} />
-          </Suspense>
-        </motion.div>
+
 
         {/* Skills Grid */}
         <div style={{
