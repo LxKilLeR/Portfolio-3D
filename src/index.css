@@ -106,26 +106,46 @@ body {
 
 /* ===================== GLASSMORPHISM ===================== */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 20px;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glass-card:hover {
-  border-color: rgba(108, 99, 255, 0.3);
-  box-shadow: 0 8px 40px rgba(108, 99, 255, 0.15), 0 0 0 1px rgba(108, 99, 255, 0.1);
-  transform: translateY(-4px);
+  border-color: rgba(108, 99, 255, 0.4);
+  box-shadow: 0 15px 40px rgba(108, 99, 255, 0.2), 0 0 0 1px rgba(108, 99, 255, 0.15);
+  transform: translateY(-8px) scale(1.03);
+  z-index: 10;
+}
+
+/* ===================== PROJECT CARD BLUR (GPU-accelerated) ===================== */
+.project-card-blur {
+  position: relative;
+}
+
+.project-card-blur::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 /* ===================== GLOW EFFECTS ===================== */

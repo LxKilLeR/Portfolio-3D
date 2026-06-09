@@ -1,16 +1,22 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../../hooks/usePortfolio';
 import { projects } from '../../data/portfolioData';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * 3D tilt card for projects — uses CSS perspective + mouse tracking
+ * Scroll animation powered by GSAP ScrollTrigger
  */
 const ProjectCard = ({ project, index }) => {
   const cardRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const blurRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
-  const [ref, inView] = useInView({ threshold: 0.1 });
 
   const handleMouseMove = useCallback((e) => {
     const card = cardRef.current;
@@ -28,22 +34,57 @@ const ProjectCard = ({ project, index }) => {
     setHovered(false);
   }, []);
 
+  // GSAP ScrollTrigger — animates opacity, y, AND blur pseudo-element together
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const blur = blurRef.current;
+    if (!wrapper || !blur) return;
+
+    // Set initial hidden state
+    gsap.set(wrapper, { opacity: 0, y: 50 });
+    gsap.set(blur, { opacity: 0 });
+
+    // Animate everything simultaneously on scroll
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapper,
+        start: 'top 85%',
+        toggleActions: 'play none none none',
+      },
+    });
+
+    // Both tweens start at position 0 = same time, no delay
+    tl.to(wrapper, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out',
+    }, 0)
+    .to(blur, {
+      opacity: 1,
+      duration: 0.6,
+      ease: 'power2.out',
+    }, 0);
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+    <div
+      ref={wrapperRef}
       data-cursor-hover
-      style={{ perspective: '1200px' }}
+      style={{ perspective: '1200px', opacity: 0 }}
     >
       <div
         ref={cardRef}
+        className="project-card-blur"
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={handleMouseLeave}
         style={{
-          background: 'rgba(255,255,255,0.03)',
+          background: 'rgba(255,255,255,0.08)',
           border: `1px solid ${hovered ? project.color + '40' : 'rgba(255,255,255,0.07)'}`,
           borderRadius: '20px',
           padding: '28px',
@@ -58,12 +99,27 @@ const ProjectCard = ({ project, index }) => {
           cursor: 'none',
         }}
       >
+        {/* GPU-accelerated blur pseudo-element control */}
+        <div ref={blurRef} aria-hidden="true" style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 'inherit',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          opacity: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
+        }} />
+        {/* Content wrapper — sits above blur layer */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
         {/* Color accent line */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
+          top: -28,
+          left: -28,
+          right: -28,
           height: '2px',
           background: `linear-gradient(90deg, transparent, ${project.color}, transparent)`,
           transition: 'opacity 0.3s ease',
@@ -187,8 +243,9 @@ const ProjectCard = ({ project, index }) => {
             GitHub →
           </a>
         </div>
+        </div>{/* end content wrapper */}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
